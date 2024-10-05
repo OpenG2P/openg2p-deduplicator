@@ -1,7 +1,7 @@
 from openg2p_fastapi_common.controller import BaseController
 from openg2p_fastapi_common.errors.http_exceptions import InternalServerError
 
-from ..schemas.health import HealthResponse
+from ..schemas.health_response import HealthResponse
 from ..services.deduplication_service import DeduplicationService
 
 
