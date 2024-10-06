@@ -10,11 +10,11 @@ class GetDuplicatesController(BaseController):
         self.router.tags += ["getDuplicates"]
 
         self.router.add_api_route(
-            "/getDuplicates/{id}",
+            "/getDuplicates/{doc_id}",
             self.get_duplicates_by_id,
             responses={200: {"model": GetDuplicatesHttpResponse}},
             methods=["GET"],
         )
 
-    async def get_duplicates_by_id(self, id: str):
+    async def get_duplicates_by_id(self, doc_id: str):
         pass

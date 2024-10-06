@@ -10,15 +10,17 @@ from .controllers.config_controller import DedupeConfigController
 from .controllers.deduplicate_controller import DeduplicateController
 from .controllers.get_duplicates_controller import GetDuplicatesController
 from .controllers.health_controller import HealthController
-from .services.config_service import ConfigService
+from .services.config_service import DedupeConfigService
 from .services.deduplication_service import DeduplicationService
+from .services.opensearch_service import OpenSearchClientService
 
 
 class Initializer(BaseInitializer):
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
 
-        ConfigService()
+        OpenSearchClientService()
+        DedupeConfigService()
         DeduplicationService()
         DedupeConfigController().post_init()
         DeduplicateController().post_init()

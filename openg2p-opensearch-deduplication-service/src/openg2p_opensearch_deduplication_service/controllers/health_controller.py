@@ -9,9 +9,7 @@ class HealthController(BaseController):
     def __init__(self, **kw):
         super().__init__(**kw)
 
-        self.deduplication_service: DeduplicationService = (
-            DeduplicationService.get_component()
-        )
+        self.deduplication_service: DeduplicationService = DeduplicationService.get_component()
 
         self.router.tags += ["health"]
 

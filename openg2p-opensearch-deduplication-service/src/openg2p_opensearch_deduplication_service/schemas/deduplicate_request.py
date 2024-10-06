@@ -1,13 +1,24 @@
+from enum import Enum
+
 from pydantic import BaseModel
 
 
+class DeduplicationStatus(Enum):
+    inprogress = "inprogress"
+    completed = "completed"
+    failed = "failed"
+
+
 class DeduplicateHttpRequest(BaseModel):
-    pass
+    doc_id: str
+    dedupe_config_name: str
 
 
 class DeduplicateHttpResponse(BaseModel):
-    pass
+    request_id: str = ""
+    status: DeduplicationStatus = None
 
 
 class DedupeStatusHttpResponse(BaseModel):
-    pass
+    status: DeduplicationStatus = None
+    status_description: str = ""

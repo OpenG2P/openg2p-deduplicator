@@ -27,9 +27,7 @@ class DeduplicateController(BaseController):
             methods=["GET"],
         )
 
-    async def post_deduplicate_with_id(
-        self, deduplicate_request: DeduplicateHttpRequest
-    ):
+    async def post_deduplicate_with_id(self, deduplicate_request: DeduplicateHttpRequest):
         pass
 
     async def get_deduplicate_request_status(self, request_id: str):

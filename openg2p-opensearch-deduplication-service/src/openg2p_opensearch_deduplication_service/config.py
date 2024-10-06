@@ -16,3 +16,7 @@ class Settings(BaseSettings):
     OpenG2P Registry deduplication based on OpenSearch
     """
     openapi_version: str = __version__
+
+    opensearch_url: str = "http://localhost:9200"
+    opensearch_username: str = ""
+    opensearch_password: str = ""

@@ -17,6 +17,7 @@ classifiers = [
 ]
 dependencies = [
   "openg2p-fastapi-common",
+  "opensearch-py[async]",
 ]
 dynamic = ["version"]
 
