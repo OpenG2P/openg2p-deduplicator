@@ -57,12 +57,12 @@ class DedupeConfigController(BaseController):
     async def get_dedupe_config(self, name: str):
         config = await self.config_service.get_config(name)
         if not config:
-            raise BadRequestError(code="G2P-DEDUPE-600", messasge="No config found with the given name")
+            raise BadRequestError(code="G2P-DEDUPE-600", message="No config found with the given name")
         return DedupeConfigGetHttpResponse(config=config)
 
     async def delete_dedupe_config(self, name: str):
         config = await self.config_service.get_config(name)
         if not config:
-            raise BadRequestError(code="G2P-DEDUPE-600", messasge="No config found with the given name")
+            raise BadRequestError(code="G2P-DEDUPE-600", message="No config found with the given name")
         await self.config_service.delete_config(name)
         return DedupeConfigPutHttpResponse(message="Config deleted.")

@@ -26,7 +26,3 @@ class Initializer(BaseInitializer):
         DeduplicateController().post_init()
         GetDuplicatesController().post_init()
         HealthController().post_init()
-
-    def migrate_database(self, args):
-        super().migrate_database(args)
-        # Create default config set

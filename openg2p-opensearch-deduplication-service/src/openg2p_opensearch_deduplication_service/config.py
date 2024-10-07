@@ -20,3 +20,8 @@ class Settings(BaseSettings):
     opensearch_url: str = "http://localhost:9200"
     opensearch_username: str = ""
     opensearch_password: str = ""
+    opensearch_api_timeout: int = 10
+
+    index_name_dedupe_config: str = "g2p_dedupe_config"
+    index_name_dedupe_requests: str = "g2p_dedupe_requests"
+    index_name_duplicates: str = "g2p_dedupe_duplicates"

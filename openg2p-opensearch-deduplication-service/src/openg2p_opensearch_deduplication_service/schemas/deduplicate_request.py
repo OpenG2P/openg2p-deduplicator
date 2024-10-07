@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class DeduplicationStatus(Enum):
     inprogress = "inprogress"
     completed = "completed"
+    paused = "paused"
     failed = "failed"
 
 
@@ -22,3 +23,10 @@ class DeduplicateHttpResponse(BaseModel):
 class DedupeStatusHttpResponse(BaseModel):
     status: DeduplicationStatus = None
     status_description: str = ""
+
+
+class DeduplicateRequestEntry(BaseModel):
+    doc_id: str
+    config_name: str
+    status: DeduplicationStatus
+    status_description: str
