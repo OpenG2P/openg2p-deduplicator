@@ -1,5 +1,10 @@
 from pydantic import BaseModel
 
 
+class DuplicateEntry(BaseModel):
+    id: str
+    match_score: str
+
+
 class GetDuplicatesHttpResponse(BaseModel):
-    pass
+    duplicates: list[DuplicateEntry]

@@ -17,7 +17,7 @@ class DedupeConfigController(BaseController):
     def __init__(self, **kw):
         super().__init__(**kw)
 
-        self.config_service: DedupeConfigService = DedupeConfigService.get_component()
+        self._config_service: DedupeConfigService = None
 
         self.router.tags += ["config"]
 
@@ -41,6 +41,12 @@ class DedupeConfigController(BaseController):
             responses={200: {"model": DedupeConfigDeleteHttpResponse}},
             methods=["DELETE"],
         )
+
+    @property
+    def config_service(self):
+        if not self._config_service:
+            self._config_service = DedupeConfigService.get_component()
+        return self._config_service
 
     async def put_dedupe_config(self, name: str, config_request: DedupeConfigHttpRequest):
         await self.config_service.add_or_update_config(

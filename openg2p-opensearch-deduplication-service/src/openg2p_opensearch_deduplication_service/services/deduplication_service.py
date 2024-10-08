@@ -50,5 +50,17 @@ class DeduplicationService(BaseService):
         res = await self.opensearch_client.get_source(index=_config.index_name_dedupe_requests, id=request_id)
         return DeduplicationStatus[res.get("status", None)], res.get("status_description", None)
 
+    async def get_duplicates_by_doc_id(self, doc_id: str) -> list[DeduplicateRequestEntry]:
+        try:
+            res = await self.opensearch_client.get_source(
+                index=_config.index_name_duplicates,
+                id=doc_id,
+                params={"timeout": _config.opensearch_api_timeout},
+            )
+        except Exception:
+            res = {}
+        res = [DeduplicateRequestEntry.model_validate(entry) for entry in res.get("duplicates", [])]
+        return res
+
     def is_runner_thread_alive(self):
         return True
