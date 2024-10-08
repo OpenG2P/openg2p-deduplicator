@@ -21,28 +21,28 @@ class DedupeConfigService(BaseService):
             self._opensearch_client = OpenSearchClientService.get_component()
         return self._opensearch_client
 
-    async def add_or_update_config(self, config: DedupeConfig):
-        await self.opensearch_client.index(
-            index=_config.index_name_dedupe_config,
+    def add_or_update_config(self, config: DedupeConfig):
+        self.opensearch_client.index(
+            index=_config.index_name_dedupe_configs,
             id=urllib.parse.quote(config.name, safe=""),
             body=config.model_dump(),
-            params={"timeout": _config.opensearch_api_timeout},
+            timeout=_config.opensearch_api_timeout,
         )
 
-    async def get_config(self, name: str) -> DedupeConfig:
+    def get_config(self, name: str) -> DedupeConfig:
         try:
-            res = await self.opensearch_client.get_source(
-                index=_config.index_name_dedupe_config,
+            res = self.opensearch_client.get_source(
+                index=_config.index_name_dedupe_configs,
                 id=urllib.parse.quote(name, safe=""),
-                params={"timeout": _config.opensearch_api_timeout},
+                timeout=_config.opensearch_api_timeout,
             )
             return DedupeConfig(**res)
         except Exception:
             return None
 
-    async def delete_config(self, name: str):
-        await self.opensearch_client.delete(
-            index=_config.index_name_dedupe_config,
+    def delete_config(self, name: str):
+        self.opensearch_client.delete(
+            index=_config.index_name_dedupe_configs,
             id=urllib.parse.quote(name, safe=""),
-            params={"timeout": _config.opensearch_api_timeout},
+            timeout=_config.opensearch_api_timeout,
         )

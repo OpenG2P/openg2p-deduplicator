@@ -25,6 +25,6 @@ class GetDuplicatesController(BaseController):
             self._deduplicate_service = DeduplicationService.get_component()
         return self._deduplicate_service
 
-    async def get_duplicates_by_id(self, doc_id: str):
-        res = await self.deduplication_service.get_duplicates_by_doc_id(doc_id=doc_id)
-        return GetDuplicatesHttpResponse(duplicates=res)
+    def get_duplicates_by_id(self, doc_id: str):
+        res = self.deduplication_service.get_duplicates_by_doc_id(doc_id=doc_id)
+        return GetDuplicatesHttpResponse(duplicates=res.duplicates)

@@ -48,8 +48,8 @@ class DedupeConfigController(BaseController):
             self._config_service = DedupeConfigService.get_component()
         return self._config_service
 
-    async def put_dedupe_config(self, name: str, config_request: DedupeConfigHttpRequest):
-        await self.config_service.add_or_update_config(
+    def put_dedupe_config(self, name: str, config_request: DedupeConfigHttpRequest):
+        self.config_service.add_or_update_config(
             DedupeConfig(
                 name=name,
                 active=config_request.active,
@@ -60,15 +60,15 @@ class DedupeConfigController(BaseController):
         )
         return DedupeConfigPutHttpResponse(message="Config updated.")
 
-    async def get_dedupe_config(self, name: str):
-        config = await self.config_service.get_config(name)
+    def get_dedupe_config(self, name: str):
+        config = self.config_service.get_config(name)
         if not config:
             raise BadRequestError(code="G2P-DEDUPE-600", message="No config found with the given name")
         return DedupeConfigGetHttpResponse(config=config)
 
-    async def delete_dedupe_config(self, name: str):
-        config = await self.config_service.get_config(name)
+    def delete_dedupe_config(self, name: str):
+        config = self.config_service.get_config(name)
         if not config:
             raise BadRequestError(code="G2P-DEDUPE-600", message="No config found with the given name")
-        await self.config_service.delete_config(name)
+        self.config_service.delete_config(name)
         return DedupeConfigPutHttpResponse(message="Config deleted.")

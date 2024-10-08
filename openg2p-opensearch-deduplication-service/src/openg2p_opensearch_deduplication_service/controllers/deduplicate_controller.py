@@ -39,13 +39,16 @@ class DeduplicateController(BaseController):
             self._deduplication_service = DeduplicationService.get_component()
         return self._deduplication_service
 
-    async def post_deduplicate_with_id(self, deduplicate_request: DeduplicateHttpRequest, request: Request):
+    def post_deduplicate_with_id(self, deduplicate_request: DeduplicateHttpRequest, request: Request):
         request_id = request.cookies.get("request_id", None) or str(uuid4())
-        status = await self.deduplication_service.create_dedupe_request(
-            request_id, deduplicate_request.doc_id, deduplicate_request.dedupe_config_name
+        status = self.deduplication_service.create_dedupe_request(
+            request_id,
+            deduplicate_request.doc_id,
+            deduplicate_request.dedupe_config_name,
+            wait_before_exec_secs=deduplicate_request.wait_before_exec_secs,
         )
         return DeduplicateHttpResponse(request_id=request_id, status=status)
 
-    async def get_deduplicate_request_status(self, request_id: str):
-        status, status_description = await self.deduplication_service.get_dedupe_request_status(request_id)
+    def get_deduplicate_request_status(self, request_id: str):
+        status, status_description = self.deduplication_service.get_dedupe_request_status(request_id)
         return DedupeStatusHttpResponse(status=status, status_description=status_description)

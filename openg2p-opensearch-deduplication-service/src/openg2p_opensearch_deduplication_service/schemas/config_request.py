@@ -6,7 +6,7 @@ from pydantic import BaseModel, field_validator
 
 class DedupeConfigField(BaseModel):
     name: str
-    fuzziness: str = "AUTO"
+    fuzziness: str | None = None
     boost: float = 1
 
 

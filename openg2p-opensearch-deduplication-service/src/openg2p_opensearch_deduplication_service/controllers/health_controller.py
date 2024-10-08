@@ -20,7 +20,7 @@ class HealthController(BaseController):
             methods=["GET"],
         )
 
-    async def get_health(self):
+    def get_health(self):
         if self.deduplication_service.is_runner_thread_alive():
             return HealthResponse(status="healthy")
         raise InternalServerError(
