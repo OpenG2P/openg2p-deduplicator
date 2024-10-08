@@ -50,5 +50,10 @@ class DeduplicateController(BaseController):
         return DeduplicateHttpResponse(request_id=request_id, status=status)
 
     def get_deduplicate_request_status(self, request_id: str):
-        status, status_description = self.deduplication_service.get_dedupe_request_status(request_id)
-        return DedupeStatusHttpResponse(status=status, status_description=status_description)
+        request_entry = self.deduplication_service.get_dedupe_request(request_id)
+        return DedupeStatusHttpResponse(
+            status=request_entry.status,
+            status_description=request_entry.status_description,
+            created_at=request_entry.created_at,
+            updated_at=request_entry.updated_at,
+        )

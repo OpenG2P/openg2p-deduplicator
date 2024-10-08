@@ -25,6 +25,8 @@ class DeduplicateHttpResponse(BaseModel):
 class DedupeStatusHttpResponse(BaseModel):
     status: DeduplicationStatus = None
     status_description: str = ""
+    created_at: datetime
+    updated_at: datetime | None = None
 
 
 class DeduplicateRequestEntry(BaseModel):
@@ -35,6 +37,7 @@ class DeduplicateRequestEntry(BaseModel):
     status_description: str
     wait_before_exec_secs: int
     created_at: datetime
+    updated_at: datetime | None = None
 
     @field_serializer("status")
     def status_serialize(self, status: DeduplicationStatus):

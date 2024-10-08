@@ -7,7 +7,6 @@ from openg2p_fastapi_common.service import BaseService
 from openg2p_fastapi_common.utils.ctx_thread import CTXThread
 
 from ..config import Settings
-from ..exceptions.dedupe_runner_exception import DedupeRunnerException
 from ..schemas.config_request import DedupeConfig
 from ..schemas.deduplicate_request import DeduplicateRequestEntry, DeduplicationStatus
 from ..schemas.get_duplicates_response import DuplicateEntry, StoredDuplicates
@@ -65,9 +64,17 @@ class DeduplicationService(BaseService):
         )
         return status
 
-    def get_dedupe_request_status(self, request_id: str) -> tuple[DeduplicationStatus, str]:
+    def get_dedupe_request(self, request_id: str) -> DeduplicateRequestEntry:
         res = self.opensearch_client.get_source(index=_config.index_name_dedupe_requests, id=request_id)
-        return DeduplicationStatus[res.get("status", None)], res.get("status_description", None)
+        return DeduplicateRequestEntry.model_validate(res)
+
+    def update_dedupe_request(self, request_id: str, key_value: dict):
+        return self.opensearch_client.update(
+            index=_config.index_name_dedupe_requests,
+            id=request_id,
+            body={"doc": key_value},
+            timeout=_config.opensearch_api_timeout,
+        )
 
     def get_duplicates_by_doc_id(self, doc_id: str) -> StoredDuplicates:
         try:
@@ -88,6 +95,7 @@ class DeduplicationService(BaseService):
                 self.run_dedupe_task()
             except Exception as e:
                 _logger.exception("Error running deduplication job" + repr(e))
+                raise
             time.sleep(_config.dedupe_runner_interval_secs)
 
     def run_dedupe_task(self):
@@ -112,22 +120,51 @@ class DeduplicationService(BaseService):
                 dedupe_request.created_at + timedelta(seconds=dedupe_request.wait_before_exec_secs)
                 > query_time
             ):
+                dedupe_request = None
                 continue
             break
         if not dedupe_request:
             return
-        # Get Dedupe config from request
-        dedupe_config = self.dedupe_config_service.get_config(dedupe_request.config_name)
-        if not dedupe_config:
-            _logger.error(
-                f"No config found with the given name: {dedupe_request.config_name}. Request Id: {dedupe_request.id}"
+        try:
+            # Get Dedupe config from request
+            dedupe_config = self.dedupe_config_service.get_config(dedupe_request.config_name)
+            if not dedupe_config:
+                _logger.error(
+                    f"No config found with the given name: {dedupe_request.config_name}. Request Id: {dedupe_request.id}"
+                )
+                self.update_dedupe_request(
+                    dedupe_request.id,
+                    {
+                        "status": DeduplicationStatus.failed.value,
+                        "status_description": "No config found with the given name",
+                        "updated_at": datetime.now(),
+                    },
+                )
+                return
+            # Find nested duplicates with the give config and update their entries
+            no_of_dups = self.find_and_update_duplicates_by_doc_id(
+                dedupe_config, dedupe_request.id, dedupe_request.doc_id
             )
-            self.update_dedupe_request(dedupe_request.id, {"status": DeduplicationStatus.failed.value})
-            return
-        # Find nested duplicates with the give config and update their entries
-        self.find_and_update_duplicates_by_doc_id(dedupe_config, dedupe_request.id, dedupe_request.doc_id)
-        # Update request status
-        self.update_dedupe_request(dedupe_request.id, {"status": DeduplicationStatus.completed.value})
+            # Update request status
+            self.update_dedupe_request(
+                dedupe_request.id,
+                {
+                    "status": DeduplicationStatus.completed.value,
+                    "status_description": f"Deduplication Complete. {no_of_dups} found.",
+                    "updated_at": datetime.now(),
+                },
+            )
+        except Exception as e:
+            _logger.exception(f"Error during deduplication for request_id: {dedupe_request.id}. {repr(e)}")
+            self.update_dedupe_request(
+                dedupe_request.id,
+                {
+                    "status": DeduplicationStatus.failed.value,
+                    "status_description": f"Deduplication Failed. {repr(e)}",
+                    "updated_at": datetime.now(),
+                },
+            )
+            pass
 
     def find_and_update_duplicates_by_doc_id(
         self, dedupe_config: DedupeConfig, dedupe_request_id, doc_id, already_updated_docs: list = None
@@ -140,10 +177,16 @@ class DeduplicationService(BaseService):
             )
         except Exception:
             _logger.error(f"Record not found with ID: {doc_id}. Request Id: {dedupe_request_id}")
-            # TODO: discuss what status to update when record not found
-            # self.update_dedupe_request(dedupe_request.id, {"status": DeduplicationStatus.failed.value})
-            self.update_dedupe_request(dedupe_request_id, {"created_at": query_time})
-            return
+            self.update_dedupe_request(
+                dedupe_request_id,
+                {
+                    # TODO: discuss what status to update when record not found
+                    # "status": DeduplicationStatus.failed.value,
+                    "status_description": f"Record with the given ID ({doc_id}) not found. Retrying...",
+                    "updated_at": query_time,
+                },
+            )
+            return -1
         # Construct match query with all fields. And search for other records
         match_query = []
         for field in dedupe_config.fields:
@@ -153,13 +196,7 @@ class DeduplicationService(BaseService):
             }
             if field.fuzziness:
                 query["fuzziness"] = field.fuzziness
-            match_query.append(
-                {
-                    "match": {
-                        field.name: query
-                    }
-                }
-            )
+            match_query.append({"match": {field.name: query}})
         duplicates_res = self.opensearch_client.search(
             body={"_source": False, "query": {"bool": {"must": match_query}}},
             index=dedupe_config.index,
@@ -191,14 +228,7 @@ class DeduplicationService(BaseService):
                 self.find_and_update_duplicates_by_doc_id(
                     dedupe_config, dedupe_request_id, duplicate_id, already_updated_docs
                 )
-
-    def update_dedupe_request(self, request_id: str, key_value: dict):
-        return self.opensearch_client.update(
-            index=_config.index_name_dedupe_requests,
-            id=request_id,
-            body={"doc": key_value},
-            timeout=_config.opensearch_api_timeout,
-        )
+        return len(duplicates_res)
 
     def is_runner_thread_alive(self):
         return self.dedupe_runner.is_alive()
