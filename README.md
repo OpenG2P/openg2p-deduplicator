@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/OpenG2P/openg2p-deduplicationservice/actions/workflows/test.yml/badge.svg?branch=develop)](https://github.com/OpenG2P/openg2p-deduplicationservice/actions/workflows/test.yml?query=branch%3Adevelop)
 [![codecov](https://codecov.io/gh/OpenG2P/openg2p-deduplicationservice/branch/develop/graph/badge.svg)](https://codecov.io/gh/OpenG2P/openg2p-deduplicationservice)
 
-OpenG2P Deduplication
+Deduplication service of OpenG2P offering fuzzy match on demographic data.
 
 ## Available Packages
 
