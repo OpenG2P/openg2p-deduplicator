@@ -7,10 +7,10 @@ github_ci_precommit: true
 github_ci_pypi_publish: true
 github_ci_tests: true
 github_ci_tests_codecov: true
-module_name: openg2p_opensearch_deduplication_service
+module_name: openg2p_deduplicator
 org_name: OpenG2P
 org_slug: OpenG2P
-package_name: openg2p-opensearch-deduplication-service
-repo_name: OpenG2P Deduplication
-repo_slug: openg2p-deduplicationservice
+package_name: openg2p-deduplicator
+repo_name: OpenG2P Deduplicator
+repo_slug: openg2p-deduplicator
 

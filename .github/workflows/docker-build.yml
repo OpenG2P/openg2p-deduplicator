@@ -5,12 +5,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  docker-build-opensearch-dedupe:
-    name: Docker Build and Push OpenSearch Deduplication
+  docker-build:
+    name: Docker Build and Push
     runs-on: ubuntu-latest
     env:
       NAMESPACE: ${{ secrets.docker_hub_organisation || 'openg2p' }}
-      SERVICE_NAME: openg2p-opensearch-deduplication-service
+      SERVICE_NAME: openg2p-deduplicator
     steps:
       - uses: actions/checkout@v3
       - name: Docker build
@@ -29,8 +29,6 @@ jobs:
           echo VERSION=$VERSION
           echo IMAGE_ID=$IMAGE_ID >> $GITHUB_ENV
           echo VERSION=$VERSION >> $GITHUB_ENV
-
-          cd openg2p-opensearch-deduplication-service
 
           docker build . \
             --file Dockerfile \
