@@ -50,11 +50,7 @@ class DedupeConfigController(BaseController):
 
     def put_dedupe_config(self, name: str, config_request: DedupeConfigHttpRequest):
         self.config_service.add_or_update_config(
-            DedupeConfig(
-                name=name,
-                created_at=datetime.now(),
-                **config_request.model_dump()
-            )
+            DedupeConfig(name=name, created_at=datetime.now(), **config_request.model_dump())
         )
         return DedupeConfigPutHttpResponse(message="Config updated.")
 

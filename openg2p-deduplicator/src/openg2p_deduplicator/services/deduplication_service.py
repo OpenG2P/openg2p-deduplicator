@@ -205,25 +205,29 @@ class DeduplicationService(BaseService):
         duplicates_res = duplicates_res.get("hits", {}).get("hits", [])
         duplicates_res = [duplicate for duplicate in duplicates_res if duplicate.get("_id") != doc_id]
         # Update duplicates in the current record and all other records
-        if (not dedupe_config.score_threshold) or dedupe_config.score_threshold <= duplicate.get("_score"):
-            self.opensearch_client.index(
-                index=_config.index_name_duplicates,
-                id=doc_id,
-                body=StoredDuplicates(
-                    duplicates=[
-                        DuplicateEntry(
-                            id=duplicate.get("_id"),
-                            match_score=duplicate.get("_score"),
-                            last_dedupe_request_id=dedupe_request_id,
-                        )
-                        for duplicate in duplicates_res
-                    ]
-                ).model_dump(),
-                timeout=_config.opensearch_api_timeout,
-            )
-            already_updated_docs = already_updated_docs or []
-            already_updated_docs.append(doc_id)
-            for duplicate in duplicates_res:
+        self.opensearch_client.index(
+            index=_config.index_name_duplicates,
+            id=doc_id,
+            body=StoredDuplicates(
+                duplicates=[
+                    DuplicateEntry(
+                        id=duplicate.get("_id"),
+                        match_score=duplicate.get("_score"),
+                        last_dedupe_request_id=dedupe_request_id,
+                    )
+                    for duplicate in duplicates_res
+                    if (not dedupe_config.score_threshold)
+                    or dedupe_config.score_threshold <= duplicate.get("_score")
+                ]
+            ).model_dump(),
+            timeout=_config.opensearch_api_timeout,
+        )
+        already_updated_docs = already_updated_docs or []
+        already_updated_docs.append(doc_id)
+        for duplicate in duplicates_res:
+            if (not dedupe_config.score_threshold) or (
+                dedupe_config.score_threshold <= duplicate.get("_score")
+            ):
                 duplicate_id = duplicate.get("_id")
                 if duplicate_id not in already_updated_docs:
                     self.find_and_update_duplicates_by_doc_id(
