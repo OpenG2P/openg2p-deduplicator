@@ -15,12 +15,14 @@ class DedupeConfig(BaseModel):
     active: bool
     index: str
     fields: list[DedupeConfigField]
+    score_threshold: float | None = None
     created_at: datetime
 
 
 class DedupeConfigHttpRequest(BaseModel):
     index: str
     fields: list[DedupeConfigField]
+    score_threshold: float | None = None
     active: bool = True
 
     @field_validator("fields")

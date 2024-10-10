@@ -52,10 +52,8 @@ class DedupeConfigController(BaseController):
         self.config_service.add_or_update_config(
             DedupeConfig(
                 name=name,
-                active=config_request.active,
-                index=config_request.index,
-                fields=config_request.fields,
                 created_at=datetime.now(),
+                **config_request.model_dump()
             )
         )
         return DedupeConfigPutHttpResponse(message="Config updated.")
