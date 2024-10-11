@@ -20,6 +20,6 @@ spec:
   ports:
     - name: http
       port: {{ .Values.service.port }}
-      targetPort: {{ .Values.springServicePort }}
+      targetPort: {{ .Values.containerPort }}
       protocol: TCP
   selector: {{- include "common.labels.matchLabels" (dict "customLabels" .Values.podLabels "context" $) | nindent 4 }}

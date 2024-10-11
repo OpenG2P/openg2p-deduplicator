@@ -467,7 +467,7 @@ istio:
 
 envVars:
   DEDUPLICATOR_PORT: '{{ .Values.containerPort }}'
-  DEDUPLICATOR_OPENAPI_ROOT_PATH: "/v1/deduplicator"
+  DEDUPLICATOR_OPENAPI_ROOT_PATH: "/v1/deduplicator/"
   DEDUPLICATOR_OPENSEARCH_URL: '{{ tpl .Values.opensearchInstallationName $ }}'
   DEDUPLICATOR_OPENSEARCH_USERNAME: admin
 
