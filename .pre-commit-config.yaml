@@ -26,6 +26,7 @@ repos:
     - id: check-symlinks
     - id: check-toml
     - id: check-yaml
+      exclude: ^charts/.*/templates/
       args:
       - --unsafe
     - id: mixed-line-ending

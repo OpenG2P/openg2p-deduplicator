@@ -1,0 +1,480 @@
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry and imagePullSecrets
+##
+# global:
+#   imageRegistry: myRegistryName
+#   imagePullSecrets:
+#     - myRegistryKeySecretName
+#   storageClass: myStorageClass
+global:
+  keycloakBaseUrl: https://keycloak.openg2p.sandbox.net
+  keycloakIssuerUrl: '{{ tpl .Values.global.keycloakBaseUrl $ }}/realms/master'
+
+hostname: socialregistry.openg2p.sandbox.net
+
+## Add labels to all the deployed resources
+##
+commonLabels: {}
+
+## Add annotations to all the deployed resources
+##
+commonAnnotations: {}
+
+## Extra objects to deploy (value evaluated as a template)
+##
+extraDeploy: []
+
+## Number of nodes
+##
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+  ## loadBalancerIP for the SuiteCRM Service (optional, cloud specific)
+  ## ref: http://kubernetes.io/docs/user-guide/services/#type-loadbalancer
+  ##
+  ## loadBalancerIP:
+  ##
+  ## nodePorts:
+  ##   http: <to set explicitly, choose port between 30000-32767>
+  ##   https: <to set explicitly, choose port between 30000-32767>
+  ##
+  nodePorts:
+    http: ""
+    https: ""
+  ## Enable client source IP preservation
+  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+
+## Here the version used is slightly modified version of 1.1.5 - this has been done to make it compatiable
+## with biosdk 'develop' version.  TODO: Change this later
+image:
+  registry: docker.io
+  repository: openg2p/openg2p-deduplicator
+  tag: develop
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: Always
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  # pullSecrets:
+  #   - myRegistryKeySecretName
+
+containerPort: 8000
+
+## Configure extra options for liveness and readiness probes
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+##
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10
+  successThreshold: 1
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 20
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+##
+# existingConfigmap:
+
+## Command and args for running the container (set to default if not set). Use array form
+##
+command: []
+args: []
+
+## Deployment pod host aliases
+## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+##
+hostAliases: []
+
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+## We usually recommend not to specify default resources and to leave this as a conscious
+## choice for the user. This also increases chances charts run on environments with little
+## resources, such as Minikube. If you do want to specify resources, uncomment the following
+## lines, adjust them as necessary.
+# resources:
+#   limits:
+#     cpu: 1000m
+#     memory: 500Mi
+#   requests:
+#     cpu: 200m
+#     memory: 200Mi
+resources: {}
+
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+##
+containerSecurityContext:
+  enabled: false
+  runAsUser: 1001
+  runAsNonRoot: true
+
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+##
+podSecurityContext:
+  enabled: false
+  fsGroup: 1001
+
+## Pod affinity preset
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+## Allowed values: soft, hard
+##
+podAffinityPreset: ""
+
+## Pod anti-affinity preset
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+## Allowed values: soft, hard
+##
+podAntiAffinityPreset: soft
+
+## Node affinity preset
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+## Allowed values: soft, hard
+##
+nodeAffinityPreset:
+  ## Node affinity type
+  ## Allowed values: soft, hard
+  ##
+  type: ""
+  ## Node label key to match
+  ## E.g.
+  ## key: "kubernetes.io/e2e-az-name"
+  ##
+  key: ""
+  ## Node label values to match
+  ## E.g.
+  ## values:
+  ##   - e2e-az1
+  ##   - e2e-az2
+  ##
+  values: []
+
+## Affinity for pod assignment. Evaluated as a template.
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+##
+affinity: {}
+
+## Node labels for pod assignment. Evaluated as a template.
+## ref: https://kubernetes.io/docs/user-guide/node-selection/
+##
+nodeSelector: {}
+
+## Tolerations for pod assignment. Evaluated as a template.
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: []
+
+## Pod extra labels
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+podLabels: {}
+
+## Annotations for server pods.
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+podAnnotations: {}
+
+##  pods' priority.
+## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+##
+# priorityClassName: ""
+
+## lifecycleHooks for the  container to automate configuration before or after startup.
+##
+lifecycleHooks: {}
+
+## Update strategy - only really applicable for deployments with RWO PVs attached
+## If replicas = 1, an update can get "stuck", as the previous pod remains attached to the
+## PV, and the "incoming" pod can never start. Changing the strategy to "Recreate" will
+## terminate the single previous pod, so that the new, incoming pod can attach to the PV
+##
+updateStrategy:
+  type: RollingUpdate
+
+## Additional environment variables to set
+## Example:
+## extraEnvVars:
+##   - name: FOO
+##     value: "bar"
+##
+extraEnvVars: []
+
+## ConfigMap with extra environment variables
+##
+extraEnvVarsCM:
+
+## Secret with extra environment variables
+##
+extraEnvVarsSecret:
+
+## Extra volumes to add to the deployment
+##
+extraVolumes: []
+
+## Extra volume mounts to add to the container
+##
+extraVolumeMounts: []
+
+## Add init containers to the  pods.
+## Example:
+## initContainers:
+##   - name: your-image-name
+##     image: your-image
+##     imagePullPolicy: Always
+##     ports:
+##       - name: portname
+##         containerPort: 1234
+##
+initContainers: []
+
+## Add sidecars to the  pods.
+## Example:
+## sidecars:
+##   - name: your-image-name
+##     image: your-image
+##     imagePullPolicy: Always
+##     ports:
+##       - name: portname
+##         containerPort: 1234
+##
+sidecars: []
+
+## Specifies whether a ServiceAccount should be created
+##
+serviceAccount:
+  create: true
+  ## The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the fullname template
+  ##
+  name:
+
+opensearch:
+  enabled: true
+  nameOverride: deduplicator-opensearch
+  hostname: opensearch.openg2p.sandbox.net
+
+  oidcWellKnownConfigUrl: '{{ tpl .Values.global.keycloakIssuerUrl $ }}/.well-known/openid-configuration'
+  oidcClientId: 'openg2p-deduplicator-opensearch-{{ .Release.Namespace }}'
+  oidcClientSecret: ''
+
+  master:
+    replicaCount: 1
+    persistence:
+      size: 8Gi
+    heapSize: 256m
+    masterOnly: false
+    resourcesPreset: "none"
+
+  data:
+    replicaCount: 0
+    # persistence:
+    #   size: 8Gi
+
+  coordinating:
+    replicaCount: 0
+
+  ingest:
+    replicaCount: 0
+
+  extraVolumes:
+  - name: security-config
+    configMap:
+      name: '{{ include "common.names.fullname" . }}-custom-config'
+
+  extraVolumeMounts:
+  - name: security-config
+    mountPath: /opt/bitnami/opensearch/config.default/opensearch-security/config.yml
+    subPath: opensearch-security-config.yml
+
+  security:
+    enabled: true
+    tls:
+      restEncryption: true
+    extraConfig: |-
+      _meta:
+        type: "config"
+        config_version: 2
+
+      config:
+        dynamic:
+          http:
+            anonymous_auth_enabled: false
+            xff:
+              enabled: false
+          authc:
+            basic_internal_auth_domain:
+              http_enabled: true
+              transport_enabled: true
+              order: 0
+              description: "Authenticate via HTTP Basic against internal users database"
+              http_authenticator:
+                type: basic
+                challenge: false
+              authentication_backend:
+                type: internal
+            openid_auth_domain:
+              http_enabled: true
+              transport_enabled: true
+              order: 1
+              description: "Authenticate via Keycloak OIDC"
+              http_authenticator:
+                type: openid
+                challenge: false
+                config:
+                  subject_key: preferred_username
+                  roles_key: client_roles
+                  openid_connect_url: '{{ tpl .Values.opensearch.oidcWellKnownConfigUrl $ }}'
+              authentication_backend:
+                type: noop
+            kerberos_auth_domain:
+              http_enabled: false
+              transport_enabled: false
+            proxy_auth_domain:
+              http_enabled: false
+              transport_enabled: false
+            jwt_auth_domain:
+              http_enabled: false
+              transport_enabled: false
+            clientcert_auth_domain:
+              http_enabled: false
+              transport_enabled: false
+            ldap:
+              http_enabled: false
+              transport_enabled: false
+          authz: {}
+
+  dashboards:
+    enabled: false
+    replicaCount: 1
+    resourcesPreset: "none"
+
+    extraVolumes:
+    - name: dashboards-config
+      configMap:
+        name: '{{ include "common.names.fullname" . }}-custom-config'
+
+    extraVolumeMounts:
+    - name: dashboards-config
+      mountPath: /opt/bitnami/opensearch-dashboards/config.default/opensearch_dashboards.yml
+      subPath: opensearch_dashboards.yml
+
+    extraConfig: |-
+      path:
+        data: /bitnami/opensearch-dashboards/data
+      opensearch:
+        requestHeadersAllowlist:
+          - authorization
+          - securitytenant
+        ssl:
+          verificationMode: none
+      opensearch_security:
+        auth:
+          type:
+          # - basicauth # Enable this to allow password based auth also
+          - openid
+          multiple_auth_enabled: true
+        openid:
+          connect_url: '{{ tpl .Values.opensearch.oidcWellKnownConfigUrl $ }}'
+          client_id: '{{ tpl .Values.opensearch.oidcClientId $ }}'
+          client_secret: '{{ tpl .Values.opensearch.oidcClientSecret $ }}'
+          base_redirect_url: 'https://{{ tpl .Values.opensearch.hostname $ }}'
+          logout_url: ""
+        ui:
+          openid:
+            login:
+              buttonname: "Log in with Keycloak"
+        multitenancy:
+          enabled: false # Enable this if multi tenancy is needed.
+          tenants:
+            preferred:
+            - Global
+            - Private
+        readonly_mode:
+          roles:
+          - kibana_read_only
+  istio:
+    enabled: true
+    virtualservice:
+      enabled: true
+      host: ""
+      gateway: "internal"
+      destination: '{{ include "common.names.fullname" . }}-dashboards'
+      destinationPort: '5601'
+    gateway:
+      enabled: false
+      host: ""
+      ingressController:
+        istio: ingressgateway
+      httpTlsRedirect: true
+      httpEnabled: true
+      httpsEnabled: false
+      tls:
+        mode: SIMPLE
+        credentialName: ""
+
+istio:
+  enabled: true
+  virtualservice:
+    enabled: true
+    host: ""
+    gateway: "internal"
+    destination: '{{ include "common.names.fullname" . }}'
+    destinationPort: '{{ .Values.service.port }}'
+    prefix: '{{ tpl .Values.envVars.DEDUPLICATOR_OPENAPI_ROOT_PATH $ }}'
+    rewriteUri: '/'
+  gateway:
+    enabled: false
+    host: ""
+    ingressController:
+      istio: ingressgateway
+    httpTlsRedirect: true
+    httpEnabled: true
+    httpsEnabled: false
+    tls:
+      mode: SIMPLE
+      credentialName: ""
+
+envVars:
+  DEDUPLICATOR_PORT: '{{ .Values.containerPort }}'
+  DEDUPLICATOR_OPENAPI_ROOT_PATH: "/v1/deduplicator"
+  DEDUPLICATOR_OPENSEARCH_URL: '{{ tpl .Values.opensearchInstallationName $ }}'
+  DEDUPLICATOR_OPENSEARCH_USERNAME: admin
+
+envVarsFrom:
+  DEDUPLICATOR_OPENSEARCH_PASSWORD:
+    secretKeyRef:
+      name: '{{ tpl .Values.opensearchInstallationName $ }}'
+      key: opensearch-password
+
+opensearchInstallationName: '{{ include "common.names.fullname" $.Subcharts.opensearch }}'
