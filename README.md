@@ -6,6 +6,8 @@
 
 Deduplication service of OpenG2P offering fuzzy match on demographic data.
 
+Refer to https://docs.openg2p.org.
+
 ## Available Packages
 
 Package | Description
