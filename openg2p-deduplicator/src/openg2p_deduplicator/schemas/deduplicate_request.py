@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, field_serializer
+from pydantic import BaseModel
 
 
 class DeduplicationStatus(Enum):
@@ -38,7 +38,3 @@ class DeduplicateRequestEntry(BaseModel):
     wait_before_exec_secs: int
     created_at: datetime
     updated_at: datetime | None = None
-
-    @field_serializer("status")
-    def status_serialize(self, status: DeduplicationStatus):
-        return status.value
