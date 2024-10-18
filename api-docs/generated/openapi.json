@@ -642,6 +642,10 @@
             "type": "string",
             "title": "Name"
           },
+          "query_type": {
+            "$ref": "#/components/schemas/DedupeConfigFieldQueryType",
+            "default": "match"
+          },
           "fuzziness": {
             "anyOf": [
               {
@@ -664,6 +668,14 @@
           "name"
         ],
         "title": "DedupeConfigField"
+      },
+      "DedupeConfigFieldQueryType": {
+        "type": "string",
+        "enum": [
+          "term",
+          "match"
+        ],
+        "title": "DedupeConfigFieldQueryType"
       },
       "DedupeConfigGetHttpResponse": {
         "properties": {
@@ -808,29 +820,6 @@
         ],
         "title": "DeduplicationStatus"
       },
-      "DuplicateEntry": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "match_score": {
-            "type": "number",
-            "title": "Match Score"
-          },
-          "last_dedupe_request_id": {
-            "type": "string",
-            "title": "Last Dedupe Request Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "match_score",
-          "last_dedupe_request_id"
-        ],
-        "title": "DuplicateEntry"
-      },
       "ErrorListResponse": {
         "properties": {
           "errors": {
@@ -867,7 +856,7 @@
         "properties": {
           "duplicates": {
             "items": {
-              "$ref": "#/components/schemas/DuplicateEntry"
+              "$ref": "#/components/schemas/HttpDuplicateEntry"
             },
             "type": "array",
             "title": "Duplicates"
@@ -902,6 +891,29 @@
         },
         "type": "object",
         "title": "HealthResponse"
+      },
+      "HttpDuplicateEntry": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "match_score": {
+            "type": "number",
+            "title": "Match Score"
+          },
+          "last_dedupe_request_id": {
+            "type": "string",
+            "title": "Last Dedupe Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "match_score",
+          "last_dedupe_request_id"
+        ],
+        "title": "HttpDuplicateEntry"
       },
       "ValidationError": {
         "properties": {
