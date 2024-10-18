@@ -281,7 +281,6 @@ serviceAccount:
 
 opensearch:
   enabled: true
-  nameOverride: deduplicator-opensearch
   hostname: opensearch.openg2p.sandbox.net
 
   oidcWellKnownConfigUrl: '{{ tpl .Values.global.keycloakIssuerUrl $ }}/.well-known/openid-configuration'

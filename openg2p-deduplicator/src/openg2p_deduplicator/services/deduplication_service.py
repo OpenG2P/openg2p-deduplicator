@@ -7,7 +7,7 @@ from openg2p_fastapi_common.service import BaseService
 from openg2p_fastapi_common.utils.ctx_thread import CTXThread
 
 from ..config import Settings
-from ..schemas.config_request import DedupeConfig
+from ..schemas.config_request import DedupeConfig, DedupeConfigFieldQueryType
 from ..schemas.deduplicate_request import DeduplicateRequestEntry, DeduplicationStatus
 from ..schemas.get_duplicates_response import DuplicateEntry, StoredDuplicates
 from ..services.config_service import DedupeConfigService
@@ -188,17 +188,30 @@ class DeduplicationService(BaseService):
             )
             return -1
         # Construct match query with all fields. And search for other records
-        match_query = []
+        query_list = []
         for field in dedupe_config.fields:
-            query = {
-                "query": record.get(field.name),
-                "boost": field.boost,
-            }
-            if field.fuzziness:
-                query["fuzziness"] = field.fuzziness
-            match_query.append({"match": {field.name: query}})
+            if field.query_type == DedupeConfigFieldQueryType.match:
+                query = {
+                    "query": record.get(field.name),
+                    "boost": field.boost,
+                }
+                if field.fuzziness:
+                    query["fuzziness"] = field.fuzziness
+                query_list.append({"match": {field.name: query}})
+            elif field.query_type == DedupeConfigFieldQueryType.term:
+                query_list.append(
+                    {
+                        "term": {
+                            field.name: {
+                                "value": record.get(field.name),
+                                "boost": field.boost,
+                                "case_insensitive": True,
+                            }
+                        }
+                    }
+                )
         duplicates_res = self.opensearch_client.search(
-            body={"_source": False, "query": {"bool": {"must": match_query}}},
+            body={"_source": False, "query": {"bool": {"must": query_list}}},
             index=dedupe_config.index,
             timeout=_config.opensearch_api_timeout,
         )
