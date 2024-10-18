@@ -1,0 +1,35 @@
+questions:
+- variable: opensearch.enabled
+  description: This installs OpenSearch along with the deduplicator
+  type: boolean
+  label: Install OpenSearch?
+
+- variable: opensearch.dashboards.enabled
+  description: This installs OpenSearch Dashboards along with OpenSearch
+  type: boolean
+  label: Install OpenSearch Dashboards?
+  show_if: "opensearch.enabled=true"
+
+- variable: opensearch.hostname
+  description: Hostname on which OpenSearch Dashboards should be accessed
+  type: string
+  label: OpenSearch Hostname
+  show_if: "opensearch.enabled=true&&opensearch.dashboards.enabled=true"
+
+- variable: global.keycloakBaseUrl
+  description: Required for Authentication.
+  type: string
+  label: Keycloak Base URL
+  show_if: "opensearch.enabled=true&&opensearch.dashboards.enabled=true"
+
+- variable: opensearch.oidcClientId
+  description: OIDC Client ID for OpenSearch login
+  type: string
+  label: OpenSearch OIDC Client ID
+  show_if: "opensearch.enabled=true&&opensearch.dashboards.enabled=true"
+
+- variable: opensearch.oidcClientSecret
+  description: OIDC Client Secret for OpenSearch login
+  type: string
+  label: OpenSearch OIDC Client Secret
+  show_if: "opensearch.enabled=true&&opensearch.dashboards.enabled=true"

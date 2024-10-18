@@ -25,7 +25,7 @@ class DedupeConfigService(BaseService):
         self.opensearch_client.index(
             index=_config.index_name_dedupe_configs,
             id=urllib.parse.quote(config.name, safe=""),
-            body=config.model_dump(),
+            body=config.model_dump(mode="json"),
             timeout=_config.opensearch_api_timeout,
         )
 

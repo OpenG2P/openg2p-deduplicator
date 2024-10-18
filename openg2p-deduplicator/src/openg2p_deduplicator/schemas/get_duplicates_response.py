@@ -1,15 +1,18 @@
 from pydantic import BaseModel
 
 
-class DuplicateEntry(BaseModel):
+class StoredDuplicateEntry(BaseModel):
+    original_id: str
+    duplicate_id: str
+    match_score: float
+    last_dedupe_request_id: str
+
+
+class HttpDuplicateEntry(BaseModel):
     id: str
     match_score: float
     last_dedupe_request_id: str
 
 
-class StoredDuplicates(BaseModel):
-    duplicates: list[DuplicateEntry]
-
-
-class GetDuplicatesHttpResponse(StoredDuplicates):
-    pass
+class GetDuplicatesHttpResponse(BaseModel):
+    duplicates: list[HttpDuplicateEntry]

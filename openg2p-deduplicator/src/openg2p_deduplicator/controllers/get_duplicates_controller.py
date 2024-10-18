@@ -1,6 +1,6 @@
 from openg2p_fastapi_common.controller import BaseController
 
-from ..schemas.get_duplicates_response import GetDuplicatesHttpResponse
+from ..schemas.get_duplicates_response import GetDuplicatesHttpResponse, HttpDuplicateEntry
 from ..services.deduplication_service import DeduplicationService
 
 
@@ -27,4 +27,12 @@ class GetDuplicatesController(BaseController):
 
     def get_duplicates_by_id(self, doc_id: str):
         res = self.deduplication_service.get_duplicates_by_doc_id(doc_id=doc_id)
-        return GetDuplicatesHttpResponse(duplicates=res.duplicates)
+        res = [
+            HttpDuplicateEntry(
+                id=entry.duplicate_id,
+                match_score=entry.match_score,
+                last_dedupe_request_id=entry.last_dedupe_request_id,
+            )
+            for entry in res
+        ]
+        return GetDuplicatesHttpResponse(duplicates=res)
